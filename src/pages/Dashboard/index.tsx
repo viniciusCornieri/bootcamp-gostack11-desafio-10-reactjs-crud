@@ -44,20 +44,23 @@ const Dashboard: React.FC = () => {
     }
   }
 
-  const handleUpdateFood = useCallback(
-    (food: Omit<IFoodPlate, 'id' | 'available'>): void => {
+  const updateFood = useCallback(
+    (updatedFood: IFoodPlate) => {
       async function callUpdateApi(): Promise<void> {
-        await api.put(`/food/${editingFood.id}`, food);
+        await api.put(`/foods/${updatedFood.id}`, updatedFood);
       }
 
       callUpdateApi();
-      setFoods(
-        foods.map(f =>
-          f.id === editingFood.id ? { ...editingFood, ...f } : f,
-        ),
-      );
+      setFoods(foods.map(f => (f.id === updatedFood.id ? updatedFood : f)));
     },
-    [editingFood, setFoods, foods],
+    [setFoods, foods],
+  );
+
+  const handleUpdateFood = useCallback(
+    (food: Omit<IFoodPlate, 'id' | 'available'>): void => {
+      updateFood({ ...editingFood, ...food });
+    },
+    [editingFood, updateFood],
   );
 
   const handleDeleteFood = useCallback(
@@ -111,6 +114,7 @@ const Dashboard: React.FC = () => {
               food={food}
               handleDelete={handleDeleteFood}
               handleEditFood={handleEditFood}
+              handleUpdateAvailability={updateFood}
             />
           ))}
       </FoodsContainer>

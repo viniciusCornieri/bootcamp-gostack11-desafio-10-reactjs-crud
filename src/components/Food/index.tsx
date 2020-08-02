@@ -3,7 +3,6 @@ import React, { useState, useCallback } from 'react';
 import { FiEdit3, FiTrash } from 'react-icons/fi';
 
 import { Container } from './styles';
-import api from '../../services/api';
 
 interface IFoodPlate {
   id: number;
@@ -18,19 +17,22 @@ interface IProps {
   food: IFoodPlate;
   handleDelete: (id: number) => void;
   handleEditFood: (food: IFoodPlate) => void;
+  handleUpdateAvailability: (food: IFoodPlate) => void;
 }
 
 const Food: React.FC<IProps> = ({
   food,
   handleDelete,
   handleEditFood,
+  handleUpdateAvailability,
 }: IProps) => {
   const [isAvailable, setIsAvailable] = useState(food.available);
 
   const toggleAvailable = useCallback(() => {
-    handleEditFood({ ...food, available: !isAvailable });
-    setIsAvailable(!isAvailable);
-  }, [setIsAvailable, isAvailable, food, handleEditFood]);
+    const newAvailability = !isAvailable;
+    handleUpdateAvailability({ ...food, available: newAvailability });
+    setIsAvailable(newAvailability);
+  }, [setIsAvailable, isAvailable, food, handleUpdateAvailability]);
 
   const setEditingFood = useCallback(() => {
     handleEditFood(food);
