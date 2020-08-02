@@ -34,15 +34,20 @@ const Dashboard: React.FC = () => {
     loadFoods();
   }, [setFoods]);
 
-  async function handleAddFood(
-    food: Omit<IFoodPlate, 'id' | 'available'>,
-  ): Promise<void> {
-    try {
-      // TODO ADD A NEW FOOD PLATE TO THE API
-    } catch (err) {
-      console.log(err);
-    }
-  }
+  const handleAddFood = useCallback(
+    (food: Omit<IFoodPlate, 'id' | 'available'>) => {
+      try {
+        api
+          .post('/foods', { ...food, available: true })
+          .then(response =>
+            setFoods(currentFoods => [...currentFoods, response.data]),
+          );
+      } catch (err) {
+        console.log(err);
+      }
+    },
+    [],
+  );
 
   const updateFood = useCallback(
     (updatedFood: IFoodPlate) => {
@@ -50,8 +55,12 @@ const Dashboard: React.FC = () => {
         await api.put(`/foods/${updatedFood.id}`, updatedFood);
       }
 
-      callUpdateApi();
-      setFoods(foods.map(f => (f.id === updatedFood.id ? updatedFood : f)));
+      try {
+        callUpdateApi();
+        setFoods(foods.map(f => (f.id === updatedFood.id ? updatedFood : f)));
+      } catch (err) {
+        console.log(err);
+      }
     },
     [setFoods, foods],
   );
@@ -69,8 +78,12 @@ const Dashboard: React.FC = () => {
         await api.delete(`/foods/${id}`);
       }
 
-      callDeleteApi();
-      setFoods(foods.filter(food => food.id !== id));
+      try {
+        callDeleteApi();
+        setFoods(foods.filter(food => food.id !== id));
+      } catch (err) {
+        console.log(err);
+      }
     },
     [setFoods, foods],
   );
