@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 import Header from '../../components/Header';
 
@@ -27,11 +27,12 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     async function loadFoods(): Promise<void> {
-      // TODO LOAD FOODS
+      const response = await api.get('/foods');
+      setFoods(response.data);
     }
 
     loadFoods();
-  }, []);
+  }, [setFoods]);
 
   async function handleAddFood(
     food: Omit<IFoodPlate, 'id' | 'available'>,
@@ -43,27 +44,49 @@ const Dashboard: React.FC = () => {
     }
   }
 
-  async function handleUpdateFood(
-    food: Omit<IFoodPlate, 'id' | 'available'>,
-  ): Promise<void> {
-    // TODO UPDATE A FOOD PLATE ON THE API
-  }
+  const handleUpdateFood = useCallback(
+    (food: Omit<IFoodPlate, 'id' | 'available'>): void => {
+      async function callUpdateApi(): Promise<void> {
+        await api.put(`/food/${editingFood.id}`, food);
+      }
 
-  async function handleDeleteFood(id: number): Promise<void> {
-    // TODO DELETE A FOOD PLATE FROM THE API
-  }
+      callUpdateApi();
+      setFoods(
+        foods.map(f =>
+          f.id === editingFood.id ? { ...editingFood, ...f } : f,
+        ),
+      );
+    },
+    [editingFood, setFoods, foods],
+  );
 
-  function toggleModal(): void {
+  const handleDeleteFood = useCallback(
+    (id: number): void => {
+      async function callDeleteApi(): Promise<void> {
+        await api.delete(`/foods/${id}`);
+      }
+
+      callDeleteApi();
+      setFoods(foods.filter(food => food.id !== id));
+    },
+    [setFoods, foods],
+  );
+
+  const toggleModal = useCallback(() => {
     setModalOpen(!modalOpen);
-  }
+  }, [setModalOpen, modalOpen]);
 
-  function toggleEditModal(): void {
+  const toggleEditModal = useCallback(() => {
     setEditModalOpen(!editModalOpen);
-  }
+  }, [setEditModalOpen, editModalOpen]);
 
-  function handleEditFood(food: IFoodPlate): void {
-    // TODO SET THE CURRENT EDITING FOOD ID IN THE STATE
-  }
+  const handleEditFood = useCallback(
+    (food: IFoodPlate) => {
+      toggleEditModal();
+      setEditingFood(food);
+    },
+    [toggleEditModal, setEditingFood],
+  );
 
   return (
     <>
